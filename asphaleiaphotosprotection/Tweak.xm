@@ -14,14 +14,14 @@ BOOL authenticating;
 
 %group UIImagePickerController
 %hook UIImagePickerController
-
--(void)viewWillAppear:(BOOL)animated {
+- (void)viewWillAppear:(BOOL)animated {
 	if (authenticated || ![[ASPreferences sharedInstance] securePhotos] || authenticating) {
 		%orig;
 		return;
 	}
-	if ([ASCommon sharedInstance].displayingAuthAlert)
+	if ([ASCommon sharedInstance].displayingAuthAlert) {
 		return;
+	}
 	authenticating = YES;
 	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertPhotos dismissedHandler:^(BOOL wasCancelled){
 		authenticating = NO;
@@ -37,7 +37,6 @@ BOOL authenticating;
 		}
 	}];
 }
-
 %end
 %end
 
@@ -45,10 +44,10 @@ BOOL authenticating;
 ALAssetsLibraryGroupsEnumerationResultsBlock block1;
 ALAssetsLibraryAccessFailureBlock block2;
 %hook ALAssetsLibrary
-
 + (int)authorizationStatus {
-	if (!authenticated && [[ASPreferences sharedInstance] securePhotos])
+	if (!authenticated && [[ASPreferences sharedInstance] securePhotos]) {
 		return 0;
+	}
 
 	return %orig;
 }
@@ -59,8 +58,9 @@ ALAssetsLibraryAccessFailureBlock block2;
 			%orig;
 		return;
 	}
-	if ([ASCommon sharedInstance].displayingAuthAlert)
+	if ([ASCommon sharedInstance].displayingAuthAlert) {
 		return;
+	}
 	authenticating = YES;
 
 	block1 = [arg2 copy];
@@ -78,7 +78,6 @@ ALAssetsLibraryAccessFailureBlock block2;
 		}
 	}];
 }
-
 %end
 %end
 
@@ -87,7 +86,6 @@ BOOL accessDenied;
 typedef void (^PHAuthBlock)(PHAuthorizationStatus status);
 PHAuthBlock authBlock;
 %hook PHPhotoLibrary
-
 + (int)authorizationStatus {
 	PHAuthorizationStatus status = %orig;
 	if (status != PHAuthorizationStatusAuthorized && [[ASPreferences sharedInstance] securePhotos]) {
@@ -95,18 +93,21 @@ PHAuthBlock authBlock;
 		return status;
 	}
 	accessDenied = NO;
-	if (!authenticated && [[ASPreferences sharedInstance] securePhotos])
+	if (!authenticated && [[ASPreferences sharedInstance] securePhotos]) {
 		return PHAuthorizationStatusNotDetermined;
+	}
 	return status;
 }
 + (void)requestAuthorization:(void (^)(PHAuthorizationStatus status))arg1 {
 	if (authenticated || ![[ASPreferences sharedInstance] securePhotos] || accessDenied || authenticating) {
-		if (!authenticating)
+		if (!authenticating) {
 			%orig;
+		}
 		return;
 	}
-	if ([ASCommon sharedInstance].displayingAuthAlert)
+	if ([ASCommon sharedInstance].displayingAuthAlert) {
 		return;
+	}
 	authenticating = YES;
 
 	authBlock = [arg1 copy];
@@ -123,25 +124,24 @@ PHAuthBlock authBlock;
 			}
 		}];
 }
-
 %end
 
 %hook PHFetchResult
-
--(NSUInteger)count {
-	if (authenticated || ![[ASPreferences sharedInstance] securePhotos])
+- (NSUInteger)count {
+	if (authenticated || ![[ASPreferences sharedInstance] securePhotos]) {
 		return %orig;
+	}
 
 	return 0;
 }
 
 - (id)objectAtIndexedSubscript:(unsigned int)arg1 {
-	if (authenticated || ![[ASPreferences sharedInstance] securePhotos])
+	if (authenticated || ![[ASPreferences sharedInstance] securePhotos]) {
 		return %orig;
+	}
 
 	return nil;
 }
-
 %end
 %end
 
@@ -151,14 +151,16 @@ id origTarget;
 SEL origSelector;
 
 - (void)setThumbnailImage:(id)arg1 animated:(BOOL)arg2 {
-	if (!authenticated)
+	if (!authenticated) {
 		%orig(nil, arg2);
+	}
 }
 - (void)setThumbnailImage:(id)arg1 uuid:(id)arg2 animated:(BOOL)arg3 {
-	if (!authenticated)
+	if (!authenticated) {
 		%orig(nil, arg2, arg3);
+	}
 }
--(void)willMoveToSuperview:(UIView *)view {
+- (void)willMoveToSuperview:(UIView *)view {
 	%orig;
 	origTarget = self.allTargets.allObjects[0];
 	origSelector = NSSelectorFromString([self actionsForTarget:origTarget forControlEvent:UIControlEventTouchUpInside][0]);
@@ -166,7 +168,7 @@ SEL origSelector;
 	[self addTarget:self action:@selector(showAuthAlert:) forControlEvents:UIControlEventTouchUpInside];
 }
 %new
--(void)showAuthAlert:(id)sender {
+- (void)showAuthAlert:(id)sender {
 	CPDistributedMessagingCenter *centre = [%c(CPDistributedMessagingCenter) centerNamed:@"com.a3tweaks.asphaleia.xpc"];
 	rocketbootstrap_distributedmessagingcenter_apply(centre);
 	NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia.xpc/CheckSlideUpControllerActive" userInfo:nil];
@@ -175,8 +177,9 @@ SEL origSelector;
 		[origTarget performSelectorOnMainThread:origSelector withObject:self waitUntilDone:NO];
 		return;
 	}
-	if ([[ASCommon sharedInstance] displayingAuthAlert])
+	if ([[ASCommon sharedInstance] displayingAuthAlert]) {
 		return;
+	}
 	authenticating = YES;
 
 	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertPhotos dismissedHandler:^(BOOL wasCancelled){
@@ -187,13 +190,13 @@ SEL origSelector;
 		}
 	}];
 }
-
 %end
 %end
 
 %ctor {
-	if ([[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.mobileslideshow"])
-		return;
+	if ([[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.mobileslideshow"]) {
+		return;		
+	}
 	BOOL loaded;
 	if (NSClassFromString(@"PHPhotoLibrary") != nil) {
 		loaded = YES;

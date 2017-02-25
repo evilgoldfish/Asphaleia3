@@ -8,7 +8,7 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
-			<string>Open Secured Items with a 4-digit number.</string>
+			<string>Open Secured Items with a 6-digit number.</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -82,7 +82,7 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
-			<string>Set how long after exiting an app before authorisation is required to open it again.</string>
+			<string>Set how long after exiting an app before authorization is required to open it again.</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -94,7 +94,7 @@
 			<key>key</key>
 			<string>timeInterval</string>
 			<key>label</key>
-			<string>Require Authorisation</string>
+			<string>Require Authorization</string>
 			<key>validTitles</key>
 			<array>
 				<string>Immediately</string>
@@ -116,7 +116,7 @@
 				<integer>1800</integer>
 			</array>
 			<key>staticTextMessage</key>
-			<string>Set how long after exiting an app before authorisation is required to open again.</string>
+			<string>Set how long after exiting an app before authorization is required to open again.</string>
 			<key>default</key>
 			<integer>0</integer>
 			<key>PostNotification</key>

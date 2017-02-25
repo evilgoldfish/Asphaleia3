@@ -20,8 +20,8 @@
     BOOL _first;
     id _delegate;
 }
--(id)initToAuthWithDelegate:(id)sender;
--(id)initToSetPasscode:(id)sender;
--(id)initWithDelegate:(id)sender;
--(id)initToSetPasscodeFirst:(id)sender;
+- (id)initToAuthWithDelegate:(id)sender;
+- (id)initToSetPasscode:(id)sender;
+- (id)initWithDelegate:(id)sender;
+- (id)initToSetPasscodeFirst:(id)sender;
 @end

@@ -9,7 +9,7 @@ static UIImage *defaultImage;
 
 @implementation ASSecuredAppsListController
 
-- (id)specifiers {
+- (NSArray *)specifiers {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(iconLoadedFromNotification:) name:ALIconLoadedNotification object:nil];
     defaultImage = [[[ALApplicationList sharedApplicationList] iconOfSize:ALApplicationIconSizeSmall forDisplayIdentifier:@"com.apple.WebSheet"] retain];
     NSArray *hiddenDisplayIdentifiers = [NSArray arrayWithObjects:
@@ -98,30 +98,29 @@ static UIImage *defaultImage;
 	return nil;
 }
 
--(void)viewDidAppear:(BOOL)animated {
+- (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     [self updateSelectionButton];
 }
 
-+ (void)loadIconsFromBackground
-{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    OSSpinLockLock(&spinLock);
-    ALApplicationList *appList = [ALApplicationList sharedApplicationList];
-    while ([iconsToLoad count]) {
-        NSDictionary *userInfo = [[iconsToLoad objectAtIndex:0] retain];
-        [iconsToLoad removeObjectAtIndex:0];
-        OSSpinLockUnlock(&spinLock);
-        CGImageRelease([appList copyIconOfSize:[[userInfo objectForKey:ALIconSizeKey] integerValue] forDisplayIdentifier:[userInfo objectForKey:ALDisplayIdentifierKey]]);
-        [userInfo release];
-        [pool drain];
-        pool = [[NSAutoreleasePool alloc] init];
-        OSSpinLockLock(&spinLock);
-    }
-    [iconsToLoad release];
-    iconsToLoad = nil;
-    OSSpinLockUnlock(&spinLock);
-    [pool drain];
++ (void)loadIconsFromBackground {
+  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+  OSSpinLockLock(&spinLock);
+  ALApplicationList *appList = [ALApplicationList sharedApplicationList];
+  while ([iconsToLoad count]) {
+      NSDictionary *userInfo = [[iconsToLoad objectAtIndex:0] retain];
+      [iconsToLoad removeObjectAtIndex:0];
+      OSSpinLockUnlock(&spinLock);
+      CGImageRelease([appList copyIconOfSize:[[userInfo objectForKey:ALIconSizeKey] integerValue] forDisplayIdentifier:[userInfo objectForKey:ALDisplayIdentifierKey]]);
+      [userInfo release];
+      [pool drain];
+      pool = [[NSAutoreleasePool alloc] init];
+      OSSpinLockLock(&spinLock);
+  }
+  [iconsToLoad release];
+  iconsToLoad = nil;
+  OSSpinLockUnlock(&spinLock);
+  [pool drain];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -213,8 +212,7 @@ static UIImage *defaultImage;
 }
 
 // AppList code, kindly borrowed from https://github.com/rpetrich/AppList/blob/master/ALApplicationTableDataSource.m
-- (void)iconLoadedFromNotification:(NSNotification *)notification
-{
+- (void)iconLoadedFromNotification:(NSNotification *)notification {
     NSDictionary *userInfo = notification.userInfo;
     NSString *displayIdentifier = [userInfo objectForKey:ALDisplayIdentifierKey];
     CGFloat iconSize = [[userInfo objectForKey:ALIconSizeKey] floatValue];
@@ -223,8 +221,7 @@ static UIImage *defaultImage;
     }
 }
 
-- (void)updateCell:(UITableViewCell *)cell forIndexPath:(NSIndexPath *)indexPath withLoadedIconOfSize:(CGFloat)newIconSize forDisplayIdentifier:(NSString *)displayIdentifier
-{
+- (void)updateCell:(UITableViewCell *)cell forIndexPath:(NSIndexPath *)indexPath withLoadedIconOfSize:(CGFloat)newIconSize forDisplayIdentifier:(NSString *)displayIdentifier {
     if (indexPath.section == 0)
         return;
 
@@ -241,17 +238,15 @@ static UIImage *defaultImage;
 }
 
 // Select/Deselect All Button
--(void)updateSelectionButton {
+- (void)updateSelectionButton {
     int total = 0;
-    for (NSInteger j = 1; j <= 2; ++j)
-        {
-            for (NSInteger i = 0; i < [self tableView:[self table] numberOfRowsInSection:j]; ++i)
-            {
-                if ([(UISwitch *)[self tableView:[self table] cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:j]].accessoryView isOn])
-                    total++;
-            }
+    for (NSInteger j = 1; j <= 2; ++j) {
+        for (NSInteger i = 0; i < [self tableView:[self table] numberOfRowsInSection:j]; ++i) {
+            if ([(UISwitch *)[self tableView:[self table] cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:j]].accessoryView isOn])
+                total++;
         }
-        NSLog(@"%i, %i",total,securedApps.count);
+    }
+    HBLogInfo(@"%i, %i",total,securedApps.count);
     if (total == securedApps.count) {
         UIBarButtonItem *nextBarButton = [[UIBarButtonItem alloc] initWithTitle:@"Deselect All" style:UIBarButtonItemStylePlain target:self action:@selector(disableAllApps)];
         [(UINavigationItem*)self.navigationItem setRightBarButtonItem:nextBarButton animated:NO];
@@ -260,12 +255,9 @@ static UIImage *defaultImage;
         [(UINavigationItem*)self.navigationItem setRightBarButtonItem:nextBarButton animated:NO];
     }
 }
-- (void)enableAllApps
-{
-    for (NSInteger section = 1; section <= 2; ++section)
-    {
-        for (NSInteger row = 0; row < [self tableView:[self table] numberOfRowsInSection:section]; ++row)
-        {
+- (void)enableAllApps {
+    for (NSInteger section = 1; section <= 2; ++section) {
+        for (NSInteger row = 0; row < [self tableView:[self table] numberOfRowsInSection:section]; ++row) {
             NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
             NSInteger altRow;
             if (section == 2) {
@@ -281,18 +273,16 @@ static UIImage *defaultImage;
 
         }
     }
-    [asphaleiaSettings setObject:securedApps forKey:@"securedApps"]; 
+    [asphaleiaSettings setObject:securedApps forKey:@"securedApps"];
     [asphaleiaSettings writeToFile:kPreferencesPath atomically:YES];
     CFNotificationCenterPostNotification (CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"), NULL, NULL,true);
     [[self table] reloadData];
     [self updateSelectionButton];
 }
-- (void)disableAllApps
-{
-    for (NSInteger section = 1; section <= 2; ++section)
-    {
-        for (NSInteger row = 0; row < [self tableView:[self table] numberOfRowsInSection:section]; ++row)
-        {
+
+- (void)disableAllApps {
+    for (NSInteger section = 1; section <= 2; ++section) {
+        for (NSInteger row = 0; row < [self tableView:[self table] numberOfRowsInSection:section]; ++row) {
             NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
             NSInteger altRow;
             if (section == 2) {
@@ -308,7 +298,7 @@ static UIImage *defaultImage;
 
         }
     }
-    [asphaleiaSettings setObject:securedApps forKey:@"securedApps"]; 
+    [asphaleiaSettings setObject:securedApps forKey:@"securedApps"];
     [asphaleiaSettings writeToFile:kPreferencesPath atomically:YES];
     CFNotificationCenterPostNotification (CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"), NULL, NULL,true);
     [[self table] reloadData];
@@ -316,12 +306,12 @@ static UIImage *defaultImage;
 }
 
 // Table view delegate methods
--(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
     if (section == 1) {
         return @"System Applications";
     } else {
         return @"User Applications";
-    } 
+    }
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {

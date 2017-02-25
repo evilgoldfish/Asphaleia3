@@ -1,4 +1,4 @@
 #import <Preferences/PSListController.h>
 
-@interface ASPasscodeOptionsListController : PSListController <UIActionSheetDelegate>
+@interface ASPasscodeOptionsListController : PSListController 
 @end

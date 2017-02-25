@@ -1,5 +1,4 @@
-Asphaleia 3
+Asphaleia X
 ===========
 
-A device security tweak for iOS.
-
+A device security tweak for iOS 10.

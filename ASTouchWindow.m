@@ -11,7 +11,7 @@
     return NO;
 }
 
-- (id)initWithFrame:(CGRect)aRect {
+- (instancetype)initWithFrame:(CGRect)aRect {
     self = [super initWithFrame:aRect];
     if (self) {
         self.windowLevel = UIWindowLevelAlert;
@@ -19,11 +19,11 @@
         [self setAlpha:1.0];
         [self setBackgroundColor:[UIColor clearColor]];
     }
-    
+
     return self;
 }
 
--(void)blockTouchesAllowingTouchInView:(SBIconView *)touchView touchBlockedHandler:(ASTouchWindowTouchBlockedEvent)handler {
+- (void)blockTouchesAllowingTouchInView:(SBIconView *)touchView touchBlockedHandler:(ASTouchWindowTouchBlockedEvent)handler {
     self.viewToAllowTouchIn = touchView;
     self.handler = [handler copy];
     [self makeKeyAndVisible];

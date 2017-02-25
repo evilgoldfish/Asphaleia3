@@ -21,18 +21,18 @@
 
 @implementation ASSecuredSettingsListController
 
-- (id)specifiers {
+- (NSArray *)specifiers {
 	return nil;
 }
 
--(void)viewWillAppear:(BOOL)animated {
+- (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     settingsPanelNames = [[NSMutableArray alloc] init];
     asphaleiaSettings = [[NSMutableDictionary alloc] initWithContentsOfFile:kPreferencesPath];
     securedSettings = [asphaleiaSettings objectForKey:@"securedPanels"] ? [asphaleiaSettings objectForKey:@"securedPanels"] : [[NSMutableDictionary alloc] init];
 }
 
--(int)getRowIndexFromAllRows:(NSIndexPath *)indexPath {
+- (int)getRowIndexFromAllRows:(NSIndexPath *)indexPath {
     int total = 0;
     for (int i = 0; i < indexPath.section; i++) {
         total += [self tableView:[self table] numberOfRowsInSection:i];

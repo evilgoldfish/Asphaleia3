@@ -6,11 +6,11 @@
 
 @implementation ASSecuredFoldersListController
 
-- (id)specifiers {
+- (NSArray *)specifiers {
 	return nil;
 }
 
--(void)viewWillAppear:(BOOL)animated {
+- (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     NSDictionary *iconState = [[NSMutableDictionary alloc] initWithContentsOfFile:kIconStateFile];
     asphaleiaSettings = [[NSMutableDictionary alloc] initWithContentsOfFile:kPreferencesPath];
@@ -18,7 +18,7 @@
     [self processDictionaryOrArray:iconState];
 }
 
--(void)processDictionaryOrArray:(id)dictOrArray {
+- (void)processDictionaryOrArray:(id)dictOrArray {
     if (!folderNames)
         folderNames = [[NSMutableArray alloc] init];
 
@@ -29,7 +29,7 @@
             [folderNames addObject:[dictOrArray objectForKey:key]];
         else
             [self processDictionaryOrArray:childDictOrArray];
-       }                         
+       }
     } else if([dictOrArray isKindOfClass:[NSArray class]]) {
        for(id childDictOrArray in dictOrArray){
             [self processDictionaryOrArray:childDictOrArray];

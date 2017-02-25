@@ -9,5 +9,5 @@ typedef void (^ASTouchWindowTouchBlockedEvent) (ASTouchWindow *touchWindow, BOOL
 }
 @property (assign) SBIconView *viewToAllowTouchIn;
 @property (nonatomic, strong) ASTouchWindowTouchBlockedEvent handler;
--(void)blockTouchesAllowingTouchInView:(SBIconView *)touchView touchBlockedHandler:(ASTouchWindowTouchBlockedEvent)handler;
+- (void)blockTouchesAllowingTouchInView:(SBIconView *)touchView touchBlockedHandler:(ASTouchWindowTouchBlockedEvent)handler;
 @end

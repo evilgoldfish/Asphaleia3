@@ -1,6 +1,6 @@
 #import <Preferences/PSTableCell.h>
 #import <Preferences/PSListController.h>
-#import <Twitter/Twitter.h>
+#import <Social/Social.h>
 #import <MessageUI/MessageUI.h>
 #import <MobileGestalt/MobileGestalt.h>
 #import <sys/sysctl.h>
@@ -13,11 +13,11 @@
 
 @implementation ASRootListController
 
-- (id)specifiers {
-	if(_specifiers == nil) {
+- (NSArray *)specifiers {
+	if (!_specifiers) {
 		_specifiers = [[self loadSpecifiersFromPlistName:@"Root" target:self] retain];
 	}
-	UIBarButtonItem *nextBarButton = [[UIBarButtonItem alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/NavHeart@2x.png"] style:UIBarButtonItemStyleBordered target:self action:@selector(loveMeh)];
+	UIBarButtonItem *nextBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/NavHeart@2x.png"] style:UIBarButtonItemStylePlain target:self action:@selector(loveMeh)];
 	UIImageView *A3ImageView = [[UIImageView alloc] initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/NavA3tweaks@2x.png"]];
 	[(UINavigationItem*)self.navigationItem setTitleView:A3ImageView];
 	[(UINavigationItem*)self.navigationItem titleView].alpha = 0.0f;
@@ -31,12 +31,11 @@
 	return _specifiers;
 }
 
-- (void)loveMeh
-{
-	if ([TWTweetComposeViewController canSendTweet]) {		
-		TWTweetComposeViewController *controller = [[TWTweetComposeViewController alloc] init];
-		[controller setInitialText:@"Securing my apps with #Asphaleia3 from @A3tweaks!"];
-		
+- (void)loveMeh {
+	if ([SLComposeViewController isAvailableForServiceType:SLServiceTypeTwitter]) {
+		SLComposeViewController *controller = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeTwitter];
+		[controller setInitialText:@"Securing my apps with #AsphaleiaX from @ShadeZepheri!"];
+
 		[(UIViewController *)[[[[[UIApplication sharedApplication] keyWindow] subviews] objectAtIndex:0] nextResponder] presentViewController:controller animated:YES completion:NULL];
 	} else {
 		UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Asphaleia" message:@"You don't seem to be able to tweet right now." preferredStyle:UIAlertControllerStyleAlert];
@@ -45,12 +44,11 @@
 	}
 }
 
--(void)viewDidDisappear:(BOOL)animated {
+- (void)viewDidDisappear:(BOOL)animated {
 	[super viewDidDisappear:animated];
 }
 
--(void)viewDidAppear:(BOOL)animated
-{
+- (void)viewDidAppear:(BOOL)animated {
 	[super viewDidAppear:animated];
 	if (!_enteredCorrectly && !self.passcodeViewIsTransitioning) {
 		[self presentAuthView];
@@ -66,10 +64,9 @@
 	}
 }
 
--(void)presentAuthView
-{
+- (void)presentAuthView {
 	// NSLog(@"================presentAuthView");
-	if([[NSFileManager defaultManager]fileExistsAtPath:kPreferencesPath] && [(NSString *)[[NSDictionary dictionaryWithContentsOfFile:kPreferencesPath] objectForKey:@"passcode"] length] == 4) {
+	if([[NSFileManager defaultManager]fileExistsAtPath:kPreferencesPath] && [(NSString *)[[NSDictionary dictionaryWithContentsOfFile:kPreferencesPath] objectForKey:@"passcode"] length] == 6) {
 		// NSLog(@"================presentAuthView def");
 		pinVC = [[modalPinVC alloc] initToAuthWithDelegate:self];
 		[(UIViewController *)self presentViewController:pinVC animated:YES completion:NULL];
@@ -80,44 +77,36 @@
 	}
 }
 
-- (void)goBack
-{
+- (void)goBack {
 	_enteredCorrectly = NO;
 	self.alreadyAnimatedOnce = NO;
 	self.passcodeViewIsTransitioning = NO;
-	//[[[self parentController] navigationController] popViewControllerAnimated:YES];
-	[[self rootController] popRecursivelyToRootController];
+	[[[self rootController] navigationController] popToRootViewControllerAnimated:YES];
 }
 
--(void)authenticated
-{
+- (void)authenticated {
 	_enteredCorrectly = YES;
 }
 
--(void)showSecurity
-{
-	[self pushController:[[ASSecuredItemsListController alloc]init]];
+- (void)showSecurity {
+	[self pushController:[[ASSecuredItemsListController alloc] init]];
 }
 
--(void)showCreators
-{
-	[self pushController:[[ASCreatorsListController alloc]init]];
+- (void)showCreators {
+	[self pushController:[[ASCreatorsListController alloc] init]];
 }
 
--(void)showPasscodeOptions
-{
-	[self pushController:[[ASPasscodeOptionsListController alloc]init]];
+- (void)showPasscodeOptions {
+	[self pushController:[[ASPasscodeOptionsListController alloc] init]];
 }
 
-- (void)showMailDialog
-{
+- (void)showMailDialog {
 	// NSLog(@"showMailDialog");
-	if ([MFMailComposeViewController canSendMail])
-	{
+	if ([MFMailComposeViewController canSendMail]) {
 		MFMailComposeViewController *mailViewController = [[MFMailComposeViewController alloc] init];
 		mailViewController.mailComposeDelegate = (id<MFMailComposeViewControllerDelegate>)self;
-		[mailViewController setSubject:@"Asphaleia 3 Support"];
-		[mailViewController setToRecipients:[NSArray arrayWithObject:@"asphaleia@a3tweaks.com"]];
+		[mailViewController setSubject:@"Asphaleia X Support"];
+		[mailViewController setToRecipients:[NSArray arrayWithObject:@"ziroalpha@gmail.com"]];
 		size_t size;
 		sysctlbyname("hw.machine", NULL, &size, NULL, 0);
 		char *machine = (char *)malloc(size);
@@ -127,16 +116,13 @@
 		[mailViewController setMessageBody:[NSString stringWithFormat:@"\n\n UUID: %@\nDevice: %@\nFirmware: %@",udid, [NSString stringWithCString:machine encoding:NSUTF8StringEncoding], [[UIDevice currentDevice] systemVersion] ] isHTML:NO];
 		[(UINavigationController *)self presentViewController:mailViewController animated:YES completion:NULL];
 		free(machine);
-	}
-	else
-	{
+	} else {
 		UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Asphaleia" message:@"Something went wrong while trying to compose the support email." preferredStyle:UIAlertControllerStyleAlert];
 		[alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:nil]];
 		[self presentViewController:alert animated:YES completion:nil];
 	}
 }
-- (void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error
-{
+- (void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error {
 	[controller dismissViewControllerAnimated:YES completion:NULL];
 }
 

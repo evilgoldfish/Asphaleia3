@@ -1,11 +1,10 @@
-Package: com.a3tweaks.asphaleia3
-Name: Asphaleia 3 (iOS 9)
-Depends: firmware (>= 9.0), mobilesubstrate (>= 0.9.5000), preferenceloader (>= 2.2.2), applist, com.a3tweaks.flipswitch, com.rpetrich.rocketbootstrap
+Package: com.shade.asphaleiaX
+Name: Asphaleia X (iOS 10)
+Depends: firmware (>= 10.0), mobilesubstrate (>= 0.9.5000), preferenceloader (>= 2.2.2), applist, com.a3tweaks.flipswitch, com.rpetrich.rocketbootstrap
 Version: 1.0.0
 Conflicts: com.rpetrich.biolockdown, net.limneos.bioprotect
 Architecture: iphoneos-arm
 Description: customizable locking system for apps & more
-Maintainer: A3tweaks <asphaleia@a3tweaks.com>
-Author: A3tweaks <asphaleia@a3tweaks.com>
+Maintainer: Shade Zepheri <ziroalpha@gmail.com>
+Author: Shade Zepheri <ziroalpha@gmail.com>
 Section: Tweaks
-Depiction: https://evilgoldfish.xyz/betarepo/asphaleia/index.html

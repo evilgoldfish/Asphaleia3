@@ -72,7 +72,7 @@
 			<key>key</key>
 			<string>secureCC</string>
 			<key>label</key>
-			<string>Control Centre</string>
+			<string>Control Center</string>
 			<key>PostNotification</key>
 			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
 		</dict>

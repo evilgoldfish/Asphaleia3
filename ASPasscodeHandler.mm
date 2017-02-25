@@ -1,13 +1,11 @@
 #import "ASPasscodeHandler.h"
 #import "ASCommon.h"
 #import "ASPreferences.h"
-#import <SpringboardUI/SBUIPasscodeEntryField.h>
-#import <SpringboardUI/SBUIPasscodeLockNumberPad.h>
 #import <AudioToolbox/AudioServices.h>
 #import "Asphaleia.h"
 
 @interface ASPasscodeHandler ()
-@property SBUIPasscodeLockViewSimple4DigitKeypad *passcodeView;
+@property SBUIPasscodeLockViewSimpleFixedDigitKeypad *passcodeView;
 @property UIWindow *passcodeWindow;
 @property (nonatomic, strong) ASPasscodeHandlerEventBlock eventBlock;
 @end
@@ -24,7 +22,7 @@ void showPasscodeView(CFNotificationCenterRef center, void *observer, CFStringRe
 
 @implementation ASPasscodeHandler
 
-+(instancetype)sharedInstance {
++ (instancetype)sharedInstance {
     static id sharedInstance = nil;
     static dispatch_once_t token = 0;
     dispatch_once(&token, ^{
@@ -33,8 +31,8 @@ void showPasscodeView(CFNotificationCenterRef center, void *observer, CFStringRe
     });
     return sharedInstance;
 }
- 
--(void)showInKeyWindowWithPasscode:(NSString *)passcode iconView:(SBIconView *)iconView eventBlock:(ASPasscodeHandlerEventBlock)eventBlock {
+
+- (void)showInKeyWindowWithPasscode:(NSString *)passcode iconView:(SBIconView *)iconView eventBlock:(ASPasscodeHandlerEventBlock)eventBlock {
 	self.passcode = passcode;
 	self.eventBlock = [eventBlock copy];
 
@@ -48,16 +46,16 @@ void showPasscodeView(CFNotificationCenterRef center, void *observer, CFStringRe
 	self.passcodeWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	self.passcodeWindow.windowLevel = UIWindowLevelAlert;
 	[self.passcodeWindow _setSecure:YES];
-	self.passcodeView = [[objc_getClass("SBUIPasscodeLockViewSimpleFixedDigitKeypad") alloc] initWithLightStyle:NO numberOfDigits:4];
+	self.passcodeView = [[objc_getClass("SBUIPasscodeLockViewSimpleFixedDigitKeypad") alloc] initWithLightStyle:NO numberOfDigits:[passcode length]];
 	[self.passcodeView setShowsEmergencyCallButton:NO];
 	[self.passcodeView setDelegate:(id)self];
 
 	UIVisualEffect *effect;
 	effect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
-	
+
 	UIVisualEffectView *effectView;
 	effectView = [[UIVisualEffectView alloc] initWithEffect:effect];
-	
+
 	effectView.frame = self.passcodeWindow.bounds;
 	[self.passcodeWindow insertSubview:effectView atIndex:0];
 
@@ -73,19 +71,19 @@ void showPasscodeView(CFNotificationCenterRef center, void *observer, CFStringRe
 	[self.passcodeView _evaluateLuminance];
 
 	[self.passcodeWindow addSubview:iconImageView];
-    [self.passcodeWindow addSubview:self.passcodeView];
-    [self.passcodeWindow setAlpha:0.f];
-    [self.passcodeWindow makeKeyAndVisible];
+  [self.passcodeWindow addSubview:self.passcodeView];
+  [self.passcodeWindow setAlpha:0.f];
+  [self.passcodeWindow makeKeyAndVisible];
 	[self.passcodeView updateStatusText:@"Enter Passcode" subtitle:nil animated:NO];
-    [UIView animateWithDuration:.15f delay:0.0
-                    options:UIViewAnimationOptionCurveEaseIn
-                 animations:^{[self.passcodeWindow setAlpha:1.f];}
-                 completion:nil];
+  [UIView animateWithDuration:.15f delay:0.0
+                  options:UIViewAnimationOptionCurveEaseIn
+               animations:^{[self.passcodeWindow setAlpha:1.f];}
+               completion:nil];
 }
 
--(void)passcodeLockViewPasscodeEntered:(SBUIPasscodeLockViewSimple4DigitKeypad *)arg1 {
+- (void)passcodeLockViewPasscodeEntered:(SBUIPasscodeLockViewSimpleFixedDigitKeypad *)arg1 {
 	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-		if (arg1.passcode.length == 4 && [arg1.passcode isEqual:self.passcode]) {
+		if (arg1.passcode.length == [self.passcode length] && [arg1.passcode isEqual:self.passcode]) {
 				[UIView animateWithDuration:.15f delay:0.0
 		                options:UIViewAnimationOptionCurveEaseIn
 		             animations:^{[self.passcodeWindow setAlpha:0.f];}
@@ -98,13 +96,13 @@ void showPasscodeView(CFNotificationCenterRef center, void *observer, CFStringRe
 							self.eventBlock(YES);
 						}
 					}];
-		} else if (arg1.passcode.length == 4 && ![arg1.passcode isEqual:self.passcode]) {
+		} else if (arg1.passcode.length == [self.passcode length] && ![arg1.passcode isEqual:self.passcode]) {
 			[arg1 resetForFailedPasscode];
 		}
 	});
 }
 
--(void)passcodeLockViewCancelButtonPressed:(id)arg1 {
+- (void)passcodeLockViewCancelButtonPressed:(id)arg1 {
 	[UIView animateWithDuration:.15f delay:0.0
                     options:UIViewAnimationOptionCurveEaseIn
                  animations:^{[self.passcodeWindow setAlpha:0.f];}
@@ -119,7 +117,7 @@ void showPasscodeView(CFNotificationCenterRef center, void *observer, CFStringRe
                  }];
 }
 
--(void)dismissPasscodeView {
+- (void)dismissPasscodeView {
 	if (self.passcodeWindow) {
 		[UIView animateWithDuration:.15f delay:0.0
     	                options:UIViewAnimationOptionCurveEaseIn
@@ -135,5 +133,5 @@ void showPasscodeView(CFNotificationCenterRef center, void *observer, CFStringRe
     	             }];
 	}
 }
- 
+
 @end

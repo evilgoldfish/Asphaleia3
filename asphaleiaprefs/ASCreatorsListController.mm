@@ -4,17 +4,15 @@
 
 @implementation ASCreatorsListController
 
-- (id)specifiers {
+- (NSArray *)specifiers {
     return nil;
 }
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
     [super viewDidLoad];
     self.title = @"Creators";
 }
-- (id)init
-{
+- (id)init {
     self = [super init];
     if (self) {
         if([[NSFileManager defaultManager]fileExistsAtPath:kPreferencesPath]){
@@ -25,20 +23,16 @@
     }
     return self;
 }
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
-{    
-    return 4;
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 5;
 }
-- (id)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
-{
+- (id)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
     return nil;
 }
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{    
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return 1;
 }
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     NSString *handleString;
     switch (indexPath.section) {
@@ -52,6 +46,9 @@
             handleString = @"CallumRyan314";
             break;
         case 3:
+            handleString = @"ShadeZepheri";
+            break;
+        case 4:
             handleString = @"A3tweaks";
             break;
         default:
@@ -59,29 +56,28 @@
     }
     UIApplication *app = [UIApplication sharedApplication];
     NSURL *tweetbot = [NSURL URLWithString:[@"tweetbot:///user_profile/" stringByAppendingString:handleString]];
-    if ([app canOpenURL:tweetbot])
-        [app openURL:tweetbot];
-    else {
+    if ([app canOpenURL:tweetbot]) {
+      [app openURL:tweetbot];
+    } else {
         NSURL *twitterapp = [NSURL URLWithString:[@"twitter:///user?screen_name=" stringByAppendingString:handleString]];
-        if ([app canOpenURL:twitterapp])
-            [app openURL:twitterapp];
-        else {
+        if ([app canOpenURL:twitterapp]) {
+          [app openURL:twitterapp];
+        } else {
             NSURL *twitterweb = [NSURL URLWithString:[@"http://twitter.com/" stringByAppendingString:handleString]];
             [app openURL:twitterweb];
         }
     }
 }
 
-- (id)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
+- (id)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     NSInteger section = indexPath.section;
     NSString *reuseIdentifier = @"Profile";
     asphaleiaTVC *cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
-    
+
     if (cell == nil) {
         cell = [[asphaleiaTVC alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
     }
-    
+
     switch (section) {
         case 0:
             [cell loadImage:@"Sentry" nameText:@"Sentry" handleText:@"(@Sentry_NC)" infoText:@"Visual Interaction Designer,\rAuxo, Apex, AltKB, Aplo,\rFounder of A³tweaks."];
@@ -93,6 +89,9 @@
             [cell loadImage:@"Callum" nameText:@"Callum" handleText:@"(@CallumRyan314)" infoText:@"iOS Developer,\nSMS Stats,\nOriginal Asphaleia developer."];
             break;
         case 3:
+            [cell loadImage:@"Shade" nameText:@"Shade" handleText:@"(@ShadeZepheri)" infoText:@"iOS Developer,\nZypen, Domum,\nStudent."];
+            break;
+        case 4:
             [cell loadImage:nil nameText:nil handleText:nil infoText:nil];
             cell.textLabel.text = @"Follow A3tweaks";
             cell.imageView.image = [UIImage imageNamed:@"GroupLogo.png" inBundle:[[NSBundle alloc] initWithPath:kBundlePath] compatibleWithTraitCollection:nil];
@@ -104,17 +103,16 @@
     return cell;
 }
 
-- (id)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
-{
+- (id)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section {
     return nil;
 }
 
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    if (indexPath.section < 3)
-        return 106.0f;
-    else
-        return 44.0f;
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section < 4) {
+      return 106.0f;
+    } else {
+      return 44.0f;
+    }
 }
 
 - (CGFloat)tableView:(id)arg1 estimatedHeightForRowAtIndexPath:(id)arg2 {

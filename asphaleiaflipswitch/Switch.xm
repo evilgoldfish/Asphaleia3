@@ -21,7 +21,7 @@
 
 @implementation AsphaleiaFlipswitchSwitch
 
--(instancetype)init {
+- (instancetype)init {
 	AsphaleiaFlipswitchSwitch *flipswitch = [super init];
 	if (flipswitch) {
 		loadPreferences();

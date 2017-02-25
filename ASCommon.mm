@@ -10,7 +10,7 @@
 #import <AppSupport/CPDistributedMessagingCenter.h>
 
 @interface ASCommon ()
--(void)authenticated:(BOOL)wasCancelled;
+- (void)authenticated:(BOOL)wasCancelled;
 @end
 
 void authenticationSuccessful(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
@@ -25,7 +25,7 @@ void authenticationCancelled(CFNotificationCenterRef center, void *observer, CFS
 
 static ASCommon *sharedCommonObj;
 
-+(instancetype)sharedInstance {
++ (instancetype)sharedInstance {
     static dispatch_once_t token = 0;
     dispatch_once(&token, ^{
         sharedCommonObj = [[ASCommon alloc] init];
@@ -36,16 +36,17 @@ static ASCommon *sharedCommonObj;
     return sharedCommonObj;
 }
 
--(BOOL)displayingAuthAlert {
+- (BOOL)displayingAuthAlert {
     CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia.xpc"];
     rocketbootstrap_distributedmessagingcenter_apply(centre);
     NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia.xpc/GetCurrentAuthAlert" userInfo:nil];
     return [reply[@"displayingAuthAlert"] boolValue];
 }
 
--(BOOL)authenticateAppWithDisplayIdentifier:(NSString *)appIdentifier customMessage:(NSString *)customMessage dismissedHandler:(ASCommonAuthenticationHandler)handler {
-    if (objc_getClass("ASAuthenticationController"))
-        return [[objc_getClass("ASAuthenticationController") sharedInstance] authenticateAppWithDisplayIdentifier:appIdentifier customMessage:customMessage dismissedHandler:handler];
+- (BOOL)authenticateAppWithDisplayIdentifier:(NSString *)appIdentifier customMessage:(NSString *)customMessage dismissedHandler:(ASCommonAuthenticationHandler)handler {
+    if (objc_getClass("ASAuthenticationController")) {
+      return [[objc_getClass("ASAuthenticationController") sharedInstance] authenticateAppWithDisplayIdentifier:appIdentifier customMessage:customMessage dismissedHandler:handler];
+    }
 
     CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia.xpc"];
     rocketbootstrap_distributedmessagingcenter_apply(centre);
@@ -53,9 +54,10 @@ static ASCommon *sharedCommonObj;
     return [reply[@"isProtected"] boolValue];
 }
 
--(BOOL)authenticateFunction:(ASAuthenticationAlertType)alertType dismissedHandler:(ASCommonAuthenticationHandler)handler {
-    if (objc_getClass("ASAuthenticationController"))
-        return [[objc_getClass("ASAuthenticationController") sharedInstance] authenticateFunction:alertType dismissedHandler:handler];
+- (BOOL)authenticateFunction:(ASAuthenticationAlertType)alertType dismissedHandler:(ASCommonAuthenticationHandler)handler {
+    if (objc_getClass("ASAuthenticationController")) {
+      return [[objc_getClass("ASAuthenticationController") sharedInstance] authenticateFunction:alertType dismissedHandler:handler];      
+    }
 
     authHandler = [handler copy];
     CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia.xpc"];
@@ -64,7 +66,7 @@ static ASCommon *sharedCommonObj;
     return [reply[@"isProtected"] boolValue];
 }
 
--(void)authenticated:(BOOL)wasCancelled {
+- (void)authenticated:(BOOL)wasCancelled {
     if (authHandler) {
         authHandler(wasCancelled);
         authHandler = nil;

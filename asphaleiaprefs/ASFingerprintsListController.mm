@@ -8,7 +8,7 @@
 
 @implementation ASFingerprintsListController
 
-- (id)specifiers {
+- (NSArray *)specifiers {
 	return nil;
 	dlopen("/System/Library/PrivateFrameworks/BiometricKit.framework/BiometricKit", RTLD_LAZY);
 }
@@ -76,7 +76,7 @@
 	return nil;
 }
 
--(id)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section {
+- (id)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section {
 	UIView *headerView = [[UIView alloc] init];
 	UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectZero];
 	headerLabel.backgroundColor = [UIColor clearColor];
@@ -117,7 +117,7 @@
 	return headerView;
 }
 
--(CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
 	if (section == 1)
 		return 45.f;
 	else

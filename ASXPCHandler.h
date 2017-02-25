@@ -10,6 +10,6 @@
 	@"com.a3tweaks.asphaleia.xpc/IsTouchIDDevice"]
 @interface ASXPCHandler : NSObject
 @property BOOL slideUpControllerActive;
-+(instancetype)sharedInstance;
++ (instancetype)sharedInstance;
 - (NSDictionary *)handleMessageNamed:(NSString *)name withUserInfo:(NSDictionary *)userinfo;
 @end

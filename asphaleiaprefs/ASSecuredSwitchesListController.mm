@@ -5,7 +5,7 @@
 
 @implementation ASSecuredSwitchesListController
 
-- (id)specifiers {
+- (NSArray *)specifiers {
 	return nil;
 }
 

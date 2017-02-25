@@ -10,7 +10,7 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
 
 @implementation ASActivatorListener
 
-+(instancetype)sharedInstance {
++ (instancetype)sharedInstance {
     static id sharedInstance = nil;
     static dispatch_once_t token = 0;
     dispatch_once(&token, ^{
@@ -20,13 +20,14 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
     });
     return sharedInstance;
 }
- 
--(void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event {
+
+- (void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event {
     SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
     NSString *bundleID = frontmostApp.bundleIdentifier;
 
-    if (!bundleID || ![[ASPreferences sharedInstance] enableDynamicSelection])
-        return;
+    if (!bundleID || ![[ASPreferences sharedInstance] enableDynamicSelection]) {
+      return;
+    }
 
     [[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertDynamicSelection dismissedHandler:^(BOOL wasCancelled){
         if (!wasCancelled) {
@@ -54,22 +55,24 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
         }
     }];
 }
- 
+
 -(void)activator:(LAActivator *)activator abortEvent:(LAEvent *)event {
     return;
 }
- 
+
 - (void)load {
     if (objc_getClass("LAActivator")) {
-        if ([[objc_getClass("LAActivator") sharedInstance] isRunningInsideSpringBoard])
-            [[objc_getClass("LAActivator") sharedInstance] registerListener:self forName:@"Dynamic Selection"];
+        if ([[objc_getClass("LAActivator") sharedInstance] isRunningInsideSpringBoard]) {
+          [[objc_getClass("LAActivator") sharedInstance] registerListener:self forName:@"Dynamic Selection"];
+        }
     }
 }
 
 - (void)unload {
     if (objc_getClass("LAActivator")) {
-        if ([[objc_getClass("LAActivator") sharedInstance] isRunningInsideSpringBoard])
-            [[objc_getClass("LAActivator") sharedInstance] unregisterListenerWithName:@"Dynamic Selection"];
+        if ([[objc_getClass("LAActivator") sharedInstance] isRunningInsideSpringBoard]) {
+          [[objc_getClass("LAActivator") sharedInstance] unregisterListenerWithName:@"Dynamic Selection"];  
+        }
     }
 }
 
@@ -92,5 +95,5 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
 - (NSData *)activator:(LAActivator *)activator requiresSmallIconDataForListenerName:(NSString *)listenerName scale:(CGFloat *)scale {
     return smallIconData;
 }
- 
+
 @end

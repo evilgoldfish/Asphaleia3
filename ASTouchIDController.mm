@@ -21,8 +21,8 @@ https://github.com/Sassoty/BioTesting */
 @end
 
 @interface SBScreenFlash
-+(id)mainScreenFlasher;
--(void)flashWhiteWithCompletion:(id)completion;
++ (id)mainScreenFlasher;
+- (void)flashWhiteWithCompletion:(id)completion;
 @end
 
 void startMonitoringNotification(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
@@ -35,7 +35,7 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 
 @implementation ASTouchIDController
 
-+(id)sharedInstance {
++ (instancetype)sharedInstance {
 	// Setup instance for current class once
 	static id sharedInstance = nil;
 	static dispatch_once_t token = 0;
@@ -48,52 +48,60 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 	return sharedInstance;
 }
 
--(void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event {
+- (void)biometricKitInterface:(id)interface handleEvent:(unsigned long long)event {
 	//[[objc_getClass("SBScreenFlash") mainScreenFlasher] flashWhiteWithCompletion:nil];
-	if (!self.isMonitoring || ![ASPreferences isTouchIDDevice])
+	if (!self.isMonitoring || ![ASPreferences isTouchIDDevice]) {
 		return;
+	}
 
-	switch(event) {
-		case TouchIDFingerDown:
+	switch (event) {
+		case TouchIDFingerDown: {
 			asphaleiaLogMsg(@"Finger down");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia.fingerdown" object:self];
 			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.fingerdown"), NULL, NULL, YES);
 			break;
-		case TouchIDFingerUp:
+		}
+		case TouchIDFingerUp: {
 			asphaleiaLogMsg(@"Finger up");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia.fingerup" object:self];
 			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.fingerup"), NULL, NULL, YES);
 			break;
+		}
 		case TouchIDFingerHeld:
 			asphaleiaLogMsg(@"Finger held");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia.fingerheld" object:self];
 			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.fingerheld"), NULL, NULL, YES);
 			break;
-		/*case TouchIDMatched:
+		case TouchIDMatched:
 			asphaleiaLogMsg(@"Finger matched");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia.authsuccess" object:self];
 			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.authsuccess"), NULL, NULL, YES);
 			[self stopMonitoring];
 			_shouldBlockLockscreenMonitor = NO;
-			break;*/
-		case TouchIDNotMatched:
+			break;
+		case TouchIDNotMatched: {
 			asphaleiaLogMsg(@"Authentication failed");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia.authfailed" object:self];
 			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.authfailed"), NULL, NULL, YES);
-			if ([[ASPreferences sharedInstance] vibrateOnIncorrectFingerprint])
+			if ([[ASPreferences sharedInstance] vibrateOnIncorrectFingerprint]) {
 				AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+			}
 			break;
-		case 10: // For the new iPhone
+		}
+		// For the new iPhone
+		case 10: {
 			asphaleiaLogMsg(@"Authentication failed");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia.authfailed" object:self];
 			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.authfailed"), NULL, NULL, YES);
-			if ([[ASPreferences sharedInstance] vibrateOnIncorrectFingerprint])
+			if ([[ASPreferences sharedInstance] vibrateOnIncorrectFingerprint]) {
 				AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+			}
 			break;
+		}
 	}
 }
 
--(void)matchResult:(id)result withDetails:(id)details {
+- (void)matchResult:(id)result withDetails:(id)details {
 	if (result) {
 		asphaleiaLogMsg(@"Finger matched");
 		[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia.authsuccess" object:self userInfo:@{ @"fingerprint" : result }];
@@ -103,67 +111,46 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 	}
 }
 
--(void)startMonitoring {
+- (void)startMonitoring {
 	// If already monitoring, don't start again
-	if(self.isMonitoring || starting || ![ASPreferences isTouchIDDevice]) {
+	if (self.isMonitoring || starting || ![ASPreferences isTouchIDDevice]) {
 		return;
 	}
 	starting = YES;
 
-	notify_post(DISABLE_VH);
-
-	id activator = [objc_getClass("LAActivator") sharedInstance];
-	if (activator)
-    {
-		id event = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"application"]; // LAEventNameFingerprintSensorPressSingle
-		id eventSpringBoard = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"springboard"];
-		id eventLockscreen = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"lockscreen"];
-		if (event)
-        {
+/*
+	LAActivator *activator = [objc_getClass("LAActivator") sharedInstance];
+	if (activator) {
+		LAEvent *event = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:activator.currentEventMode];
+		if (event) {
 			activatorListenerNames = [activator assignedListenerNamesForEvent:event];
-			if (activatorListenerNames)
-				for (NSString *listenerName in activatorListenerNames)
+			if (activatorListenerNames) {
+				for (NSString *listenerName in activatorListenerNames) {
 					[activator removeListenerAssignment:listenerName fromEvent:event];
-		}
-
-		if (eventSpringBoard)
-        {
-			activatorListenerNamesSpringBoard = [activator assignedListenerNamesForEvent:eventSpringBoard];
-			if (activatorListenerNamesSpringBoard)
-				for (NSString *listenerName in activatorListenerNamesSpringBoard)
-					[activator removeListenerAssignment:listenerName fromEvent:eventSpringBoard];
-		}
-
-		if (eventLockscreen)
-        {
-			activatorListenerNamesLS = [activator assignedListenerNamesForEvent:eventLockscreen];
-			if (activatorListenerNamesLS)
-				for (NSString *listenerName in activatorListenerNamesLS)
-					[activator removeListenerAssignment:listenerName fromEvent:eventLockscreen];
+				}
+			}
 		}
 	}
+*/
 
-	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
-	previousMatchingSetting = [monitor isMatchingEnabled];
-
-	_oldObservers = [MSHookIvar<NSHashTable*>(monitor, "_observers") copy];
-	for (id observer in _oldObservers)
-		[monitor removeObserver:observer];
+	_SBUIBiometricKitInterface *interface = [[objc_getClass("BiometricKit") manager] delegate];
+	_oldDelegate = interface.delegate;
 
 	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
 	Class la = objc_getClass("LASharedActivator");
 	if (la) {
-		if ([(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Dynamic Selection"])
+		if ([(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Dynamic Selection"]) {
 			[[ASActivatorListener sharedInstance] unload];
-		
-		if ([(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"])
+		}
+
+		if ([(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"]) {
 			[[ASControlPanel sharedInstance] unload];
+		}
 	}
 
 	// Begin listening :D
-	[monitor addObserver:self];
-	[monitor _setMatchingEnabled:YES];
-	[monitor _startMatching];
+	[interface setDelegate:self];
+	[interface matchWithMode:0 andCredentialSet:nil];
 
 	starting = NO;
 	self.isMonitoring = YES;
@@ -171,52 +158,42 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 	asphaleiaLogMsg(@"Touch ID monitoring began");
 }
 
--(void)stopMonitoring {
-	if(!self.isMonitoring || stopping || ![ASPreferences isTouchIDDevice]) {
+- (void)stopMonitoring {
+	if (!self.isMonitoring || stopping || ![ASPreferences isTouchIDDevice]) {
 		return;
 	}
 	stopping = YES;
 
-	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
-	NSHashTable *observers = MSHookIvar<NSHashTable*>(monitor, "_observers");
-	if (observers && [observers containsObject:self])
-		[monitor removeObserver:self];
-	if (_oldObservers && observers)
-		for (id observer in _oldObservers)
-				[monitor addObserver:observer];
-	_oldObservers = nil;
-	[monitor _setMatchingEnabled:previousMatchingSetting];
-	notify_post(ENABLE_VH);
+	_SBUIBiometricKitInterface *interface = [[objc_getClass("BiometricKit") manager] delegate];
+	[interface cancel];
+	[interface setDelegate:_oldDelegate];
+	[interface detectFingerWithOptions:nil];
 
-	id activator = [objc_getClass("LAActivator") sharedInstance];
-    if (activator && activatorListenerNames && activatorListenerNamesSpringBoard)
-    {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^(void){
-			id event = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"application"]; // LAEventNameFingerprintSensorPressSingle
-			id eventSpringBoard = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"springboard"];
-			id eventLockscreen = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"lockscreen"];
-			if (event)
-				for (NSString *listenerName in activatorListenerNames) 
+	_oldDelegate = nil;
+
+/*
+	LAActivator *activator = [objc_getClass("LAActivator") sharedInstance];
+  if (activator && activatorListenerNames) {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^(void){
+			LAEvent *event = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:activator.currentEventMode];
+			if (event) {
+				for (NSString *listenerName in activatorListenerNames) {
 					[activator addListenerAssignment:listenerName toEvent:event];
-
-			if (eventSpringBoard)
-				for (NSString *listenerName in activatorListenerNamesSpringBoard) 
-					[activator addListenerAssignment:listenerName toEvent:eventSpringBoard];
-
-			if (eventLockscreen)
-				for (NSString *listenerName in activatorListenerNamesLS) 
-					[activator addListenerAssignment:listenerName toEvent:eventLockscreen];
-        });
-    }
+				}
+			}
+		});
+	}
+*/
 
 	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
 	Class la = objc_getClass("LASharedActivator");
 	if (la) {
-		if (![(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Dynamic Selection"])
+		if (![(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Dynamic Selection"]) {
 			[[ASActivatorListener sharedInstance] load];
-
-		if (![(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"])
+		}
+		if (![(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"]) {
 			[[ASControlPanel sharedInstance] load];
+		}
 	}
 
 	stopping = NO;

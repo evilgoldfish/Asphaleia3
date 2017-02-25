@@ -13,13 +13,14 @@
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
 
 @interface ASAuthenticationController ()
--(void)receivedNotificationOfName:(NSString *)name fingerprint:(id)fingerprint;
+- (void)receivedNotificationOfName:(NSString *)name fingerprint:(id)fingerprint;
 @end
 
 void touchIDNotificationReceived(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
     id fingerprint = nil;
-    if ([(__bridge NSString *)name isEqualToString:@"com.a3tweaks.asphaleia.authsuccess"])
-        fingerprint = [[ASTouchIDController sharedInstance] lastMatchedFingerprint];
+    if ([(__bridge NSString *)name isEqualToString:@"com.a3tweaks.asphaleia.authsuccess"]) {
+      fingerprint = [[ASTouchIDController sharedInstance] lastMatchedFingerprint];
+    }
     [[ASAuthenticationController sharedInstance] receivedNotificationOfName:(__bridge NSString *)name fingerprint:fingerprint];
 }
 
@@ -27,7 +28,7 @@ void touchIDNotificationReceived(CFNotificationCenterRef center, void *observer,
 
 static ASAuthenticationController *sharedCommonObj;
 
-+(instancetype)sharedInstance {
++ (instancetype)sharedInstance {
     static dispatch_once_t token = 0;
     dispatch_once(&token, ^{
         sharedCommonObj = [[ASAuthenticationController alloc] init];
@@ -37,16 +38,17 @@ static ASAuthenticationController *sharedCommonObj;
     return sharedCommonObj;
 }
 
--(void)dealloc {
+- (void)dealloc {
     [self deregisterForTouchIDNotifications];
 }
 
--(ASAuthenticationAlert *)returnAppAuthenticationAlertWithApplication:(NSString *)appIdentifier customMessage:(NSString *)customMessage delegate:(id<ASAuthenticationAlertDelegate>)delegate {
+- (ASAuthenticationAlert *)returnAppAuthenticationAlertWithApplication:(NSString *)appIdentifier customMessage:(NSString *)customMessage delegate:(id<ASAuthenticationAlertDelegate>)delegate {
     NSString *message;
-    if (customMessage)
-        message = customMessage;
-    else
-        message = @"Scan fingerprint to open.";
+    if (customMessage) {
+      message = customMessage;
+    } else {
+      message = @"Scan fingerprint to open.";
+    }
 
     ASAuthenticationAlert *alertView = [[objc_getClass("ASAuthenticationAlert") alloc] initWithApplication:appIdentifier
                    message:message
@@ -58,68 +60,79 @@ static ASAuthenticationController *sharedCommonObj;
     return alertView;
 }
 
--(ASAuthenticationAlert *)returnAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType delegate:(id<ASAuthenticationAlertDelegate>)delegate {
+- (ASAuthenticationAlert *)returnAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType delegate:(id<ASAuthenticationAlertDelegate>)delegate {
     NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
 
     NSString *title;
     UIImage *iconImage;
     int tag;
     switch (alertType) {
-        case ASAuthenticationAlertAppArranging:
-            title = @"Arrange Apps";
-            iconImage = [UIImage imageNamed:@"IconEditMode.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
-            tag = ASAuthenticationFunction;
-            break;
-        case ASAuthenticationAlertSwitcher:
-            title = @"Multitasking";
-            iconImage = [UIImage imageNamed:@"IconMultitasking.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
-            tag = ASAuthenticationFunction;
-            break;
-        case ASAuthenticationAlertSpotlight:
-            title = @"Spotlight";
-            iconImage = [UIImage imageNamed:@"IconSpotlight.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
-            tag = ASAuthenticationFunction;
-            break;
-        case ASAuthenticationAlertPowerDown:
-            title = @"Slide to Power Off";
-            iconImage = [UIImage imageNamed:@"IconPowerOff.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
-            tag = ASAuthenticationFunction;
-            break;
-        case ASAuthenticationAlertControlCentre:
-            title = @"Control Center";
-            iconImage = [UIImage imageNamed:@"IconControlCenter.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
-            tag = ASAuthenticationFunction;
-            break;
-        case ASAuthenticationAlertControlPanel:
-            title = @"Asphaleia Control Panel";
-            iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
-            tag = ASAuthenticationSecurityMod;
-            break;
-        case ASAuthenticationAlertDynamicSelection:
-            title = @"Dynamic Selection";
-            iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
-            tag = ASAuthenticationSecurityMod;
-            break;
-        case ASAuthenticationAlertPhotos:
-            title = @"Photo Library";
-            iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
-            tag = ASAuthenticationFunction;
-            break;
-        case ASAuthenticationAlertSettingsPanel:
-            title = @"Settings Panel";
-            iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
-            tag = ASAuthenticationItem;
-            break;
-        case ASAuthenticationAlertFlipswitch:
-            title = @"Flipswitch";
-            iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
-            tag = ASAuthenticationItem;
-            break;
-        default:
-            title = @"Asphaleia";
-            iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
-            tag = ASAuthenticationFunction;
-            break;
+        case ASAuthenticationAlertAppArranging: {
+          title = @"Arrange Apps";
+          iconImage = [UIImage imageNamed:@"IconEditMode.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+          tag = ASAuthenticationFunction;
+          break;
+        }
+        case ASAuthenticationAlertSwitcher: {
+          title = @"Multitasking";
+          iconImage = [UIImage imageNamed:@"IconMultitasking.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+          tag = ASAuthenticationFunction;
+          break;
+        }
+        case ASAuthenticationAlertSpotlight: {
+          title = @"Spotlight";
+          iconImage = [UIImage imageNamed:@"IconSpotlight.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+          tag = ASAuthenticationFunction;
+          break;
+        }
+        case ASAuthenticationAlertPowerDown: {
+          title = @"Slide to Power Off";
+          iconImage = [UIImage imageNamed:@"IconPowerOff.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+          tag = ASAuthenticationFunction;
+          break;
+        }
+        case ASAuthenticationAlertControlCentre: {
+          title = @"Control Center";
+          iconImage = [UIImage imageNamed:@"IconControlCenter.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+          tag = ASAuthenticationFunction;
+          break;
+        }
+        case ASAuthenticationAlertControlPanel: {
+          title = @"Asphaleia Control Panel";
+          iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+          tag = ASAuthenticationSecurityMod;
+          break;
+        }
+        case ASAuthenticationAlertDynamicSelection: {
+          title = @"Dynamic Selection";
+          iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+          tag = ASAuthenticationSecurityMod;
+          break;
+        }
+        case ASAuthenticationAlertPhotos: {
+          title = @"Photo Library";
+          iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+          tag = ASAuthenticationFunction;
+          break;
+        }
+        case ASAuthenticationAlertSettingsPanel: {
+          title = @"Settings Panel";
+          iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+          tag = ASAuthenticationItem;
+          break;
+        }
+        case ASAuthenticationAlertFlipswitch: {
+          title = @"Flipswitch";
+          iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+          tag = ASAuthenticationItem;
+          break;
+        }
+        default: {
+          title = @"Asphaleia";
+          iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+          tag = ASAuthenticationFunction;
+          break;
+        }
     }
 
     UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
@@ -135,7 +148,7 @@ static ASAuthenticationController *sharedCommonObj;
     return alertView;
 }
 
--(BOOL)authenticateAppWithDisplayIdentifier:(NSString *)appIdentifier customMessage:(NSString *)customMessage dismissedHandler:(ASCommonAuthenticationHandler)handler {
+- (BOOL)authenticateAppWithDisplayIdentifier:(NSString *)appIdentifier customMessage:(NSString *)customMessage dismissedHandler:(ASCommonAuthenticationHandler)handler {
     [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
 
     if (![[ASPreferences sharedInstance] requiresSecurityForApp:appIdentifier]) {
@@ -165,7 +178,7 @@ static ASAuthenticationController *sharedCommonObj;
     return YES;
 }
 
--(BOOL)authenticateFunction:(ASAuthenticationAlertType)alertType dismissedHandler:(ASCommonAuthenticationHandler)handler {
+- (BOOL)authenticateFunction:(ASAuthenticationAlertType)alertType dismissedHandler:(ASCommonAuthenticationHandler)handler {
     if ([ASPreferences sharedInstance].asphaleiaDisabled) {
         return NO;
     }
@@ -181,8 +194,8 @@ static ASAuthenticationController *sharedCommonObj;
 
     if (![[ASPreferences sharedInstance] touchIDEnabled]) {
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:nil eventBlock:^void(BOOL authenticated){
-                authHandler(!authenticated);
-            }];
+            authHandler(!authenticated);
+        }];
         return YES;
     }
 
@@ -192,9 +205,10 @@ static ASAuthenticationController *sharedCommonObj;
     return YES;
 }
 
--(BOOL)authenticateAppWithIconView:(SBIconView *)iconView authenticatedHandler:(ASCommonAuthenticationHandler)handler {
-    if (![[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.springboard"])
-            return NO;
+- (BOOL)authenticateAppWithIconView:(SBIconView *)iconView authenticatedHandler:(ASCommonAuthenticationHandler)handler {
+    if (![[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.springboard"]) {
+      return NO;
+    }
 
     if ([ASPreferences sharedInstance].asphaleiaDisabled || [ASPreferences sharedInstance].itemSecurityDisabled || [[iconView icon] isDownloadingIcon]) {
         [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
@@ -271,23 +285,25 @@ static ASAuthenticationController *sharedCommonObj;
     return YES;
 }
 
--(void)receivedNotificationOfName:(NSString *)name fingerprint:(id)fingerprint
-{
+- (void)receivedNotificationOfName:(NSString *)name fingerprint:(id)fingerprint {
     if (self.currentHSIconView) {
-        if ([fingerprint isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
-            if (![[ASPreferences sharedInstance] fingerprintProtectsSecureItems:[fingerprint name]])
-                name = @"com.a3tweaks.asphaleia.authfailed";
+        if ([fingerprint isKindOfClass:objc_getClass("BiometricKitIdentity")]) {
+            if (![[ASPreferences sharedInstance] fingerprintProtectsSecureItems:[fingerprint name]]) {
+              name = @"com.a3tweaks.asphaleia.authfailed";
+            }
         }
-        if (![[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.springboard"])
-            return;
+        if (![[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.springboard"]) {
+          return;
+        }
         if ([name isEqualToString:@"com.a3tweaks.asphaleia.fingerdown"]) {
             if (_fingerglyph && _currentHSIconView) {
                 [_fingerglyph setState:1 animated:YES completionHandler:nil];
                 [_currentHSIconView asphaleia_updateLabelWithText:@"Scanning..."];
             }
         } else if ([name isEqualToString:@"com.a3tweaks.asphaleia.fingerup"]) {
-            if (_fingerglyph)
-                [_fingerglyph setState:0 animated:YES completionHandler:nil];
+            if (_fingerglyph) {
+              [_fingerglyph setState:0 animated:YES completionHandler:nil];
+            }
         } else if ([name isEqualToString:@"com.a3tweaks.asphaleia.authsuccess"]) {
             if (_fingerglyph && _currentHSIconView) {
                 [ASAuthenticationController sharedInstance].appUserAuthorisedID = currentAuthAppBundleID;
@@ -308,36 +324,34 @@ static ASAuthenticationController *sharedCommonObj;
     }
 }
 
--(void)registerForTouchIDNotifications {
+- (void)registerForTouchIDNotifications {
     addObserver(touchIDNotificationReceived, "com.a3tweaks.asphaleia.fingerdown");
     addObserver(touchIDNotificationReceived, "com.a3tweaks.asphaleia.fingerup");
     addObserver(touchIDNotificationReceived, "com.a3tweaks.asphaleia.authsuccess");
     addObserver(touchIDNotificationReceived, "com.a3tweaks.asphaleia.authfailed");
 }
 
--(void)deregisterForTouchIDNotifications {
+- (void)deregisterForTouchIDNotifications {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
--(void)dismissAnyAuthenticationAlerts {
+- (void)dismissAnyAuthenticationAlerts {
     if (self.currentAuthAlert)
         [self.currentAuthAlert dismiss];
 }
 
-- (NSArray *)allSubviewsOfView:(UIView *)view
-{
+- (NSArray *)allSubviewsOfView:(UIView *)view {
     NSMutableArray *viewArray = [[NSMutableArray alloc] init];
     [viewArray addObject:view];
-    for (UIView *subview in view.subviews)
-    {
+    for (UIView *subview in view.subviews) {
         [viewArray addObjectsFromArray:(NSArray *)[self allSubviewsOfView:subview]];
     }
     return [NSArray arrayWithArray:viewArray];
 }
 
--(void)initialiseGlyphIfRequired {
+- (void)initialiseGlyphIfRequired {
     if (!_fingerglyph) {
-        _fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
+        _fingerglyph = [(PKGlyphView*)[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
         _fingerglyph.secondaryColor = [UIColor grayColor];
         _fingerglyph.primaryColor = [UIColor redColor];
     }
@@ -346,7 +360,7 @@ static ASAuthenticationController *sharedCommonObj;
 // ASAuthenticationAlert delegate methods
 - (void)authAlertView:(ASAuthenticationAlert *)alertView dismissed:(BOOL)dismissed authorised:(BOOL)authorised fingerprint:(BiometricKitIdentity *)fingerprint {
     BOOL correctFingerUsed = YES;
-    if ([fingerprint isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
+    if ([fingerprint isKindOfClass:objc_getClass("BiometricKitIdentity")]) {
         correctFingerUsed = NO;
         switch (self.currentAuthAlert.tag) {
             case ASAuthenticationItem:
@@ -364,13 +378,15 @@ static ASAuthenticationController *sharedCommonObj;
         }
     }
 
-    if (!correctFingerUsed)
-        return;
-    else if (correctFingerUsed && !dismissed)
-        [self.currentAuthAlert dismiss];
+    if (!correctFingerUsed) {
+      return;
+    } else if (correctFingerUsed && !dismissed) {
+      [self.currentAuthAlert dismiss];
+    }
     CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.stopmonitoring"), NULL, NULL, YES);
-    if (authorised)
-        _appUserAuthorisedID = currentAuthAppBundleID;
+    if (authorised) {
+      _appUserAuthorisedID = currentAuthAppBundleID;
+    }
 
     authHandler(!(authorised && correctFingerUsed));
     self.currentAuthAlert = nil;

@@ -9,14 +9,14 @@
 
 @implementation ASControlPanelListController
 
-- (id)specifiers {
-	if(_specifiers == nil) {
-        _specifiers = [[self loadSpecifiersFromPlistName:@"PasscodeOptions-AsphaleiaControlPanel" target:self] retain];
-    }
-    return _specifiers;
+- (NSArray *)specifiers {
+	if (!_specifiers) {
+      _specifiers = [[self loadSpecifiersFromPlistName:@"PasscodeOptions-AsphaleiaControlPanel" target:self] retain];
+  }
+  return _specifiers;
 }
 
--(void)openActivatorControlPanel {
+- (void)openActivatorControlPanel {
     dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
     Class la = objc_getClass("LAListenerSettingsViewController");
     if (la) {
@@ -26,22 +26,22 @@
         [self.navigationController pushViewController:vc animated:YES];
     }
 }
- 
--(id) readPreferenceValue:(PSSpecifier*)specifier {
+
+- (id)readPreferenceValue:(PSSpecifier*)specifier {
     NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:PreferencesPath];
     if (!settings[specifier.properties[@"key"]]) {
         return specifier.properties[@"default"];
     }
     return settings[specifier.properties[@"key"]];
 }
- 
--(void) setPreferenceValue:(id)value specifier:(PSSpecifier*)specifier {
+
+- (void)setPreferenceValue:(id)value specifier:(PSSpecifier*)specifier {
     NSMutableDictionary *defaults = [NSMutableDictionary dictionary];
     [defaults addEntriesFromDictionary:[NSDictionary dictionaryWithContentsOfFile:PreferencesPath]];
     [defaults setObject:value forKey:specifier.properties[@"key"]];
     [defaults writeToFile:PreferencesPath atomically:YES];
     CFStringRef toPost = (CFStringRef)specifier.properties[@"PostNotification"];
-    if(toPost) CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), toPost, NULL, NULL, YES);
+    if (toPost) CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), toPost, NULL, NULL, YES);
 }
 
 @end
